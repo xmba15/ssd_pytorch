@@ -142,16 +142,21 @@ class DatasetBase(object):
             for bbox in o_bboxes
         ]
 
+        img = o_img
+        bboxes = o_bboxes
+        category_ids = o_category_ids
+        height, width = o_height, o_width
         if self._transform:
             img, bboxes, category_ids = self._transform(
-                o_img, o_bboxes, o_category_ids, phase=self._phase
+                img, bboxes, category_ids, phase=self._phase
             )
+
+            # use the height, width after transformation for normalization
+            height, width, _ = img.shape
 
         # if number of boxes is 0, use original image
         # see data transform for more details
 
-        # use the height, width after transformation for normalization
-        height, width, _ = img.shape
         if self._normalize_bbox:
             bboxes = [
                 [
