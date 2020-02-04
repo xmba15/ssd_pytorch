@@ -37,12 +37,12 @@ from albumentations import (
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--batch_size", type=int, default=32)
-parser.add_argument("--num_epoch", type=int, default=2000)
+parser.add_argument("--num_epoch", type=int, default=860)
 parser.add_argument("--lr_rate", type=float, default=1e-3)
 parser.add_argument("--momentum", default=0.9, type=float)
 parser.add_argument("--weight_decay", default=5e-4, type=float)
 parser.add_argument("--gamma", default=0.1, type=float)
-parser.add_argument("--milestones", default="1500, 1600", type=str)
+parser.add_argument("--milestones", default="571, 714", type=str)
 parser.add_argument("--save_period", type=int, default=5)
 parser.add_argument("--snapshot", type=str)
 parsed_args = parser.parse_args()
@@ -77,12 +77,16 @@ def main(args):
         ),
         CLAHE(clip_limit=2.0, p=0.5),
         HorizontalFlip(p=0.5),
-        RandomScale(scale_limit=0.4, p=0.5),
-        RandomResizedCrop(height=400, width=400, p=0.5),
         Cutout(num_holes=5, p=0.5),
-        ShiftScaleRotate(scale_limit=0.5, rotate_limit=60, p=0.5),
+        ShiftScaleRotate(scale_limit=0.5, rotate_limit=20, p=0.6),
         IAAAffine(p=0.5),
-        RandomSizedBBoxSafeCrop(300, 300, p=0.5),
+        OneOf(
+            [
+                RandomResizedCrop(height=400, width=400),
+                RandomSizedBBoxSafeCrop(300, 300),
+            ],
+            p=0.7,
+        ),
         RandomShadow(p=0.5),
     ]
 

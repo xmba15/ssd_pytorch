@@ -147,9 +147,15 @@ class DatasetBase(object):
         category_ids = o_category_ids
         height, width = o_height, o_width
         if self._transform:
-            img, bboxes, category_ids = self._transform(
-                img, bboxes, category_ids, phase=self._phase
-            )
+            if isinstance(self._transform, list):
+                for transform in self._transform:
+                    img, bboxes, category_ids = transform(
+                        img, bboxes, category_ids, phase=self._phase
+                    )
+            else:
+                img, bboxes, category_ids = self._transform(
+                    img, bboxes, category_ids, phase=self._phase
+                )
 
             # use the height, width after transformation for normalization
             height, width, _ = img.shape

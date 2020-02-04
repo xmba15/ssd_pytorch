@@ -35,7 +35,7 @@ class BirdDataset(DatasetBase):
         random_seed=2000,
         normalize_bbox=False,
         bbox_transformer=None,
-        train_val_ratio=0.9
+        train_val_ratio=0.9,
     ):
         super(BirdDataset, self).__init__(
             data_path,

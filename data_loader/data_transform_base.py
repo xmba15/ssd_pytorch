@@ -57,10 +57,11 @@ class DataTransformBase(object):
             transformer = Compose([transform], bbox_params=self._bbox_params)
             augmented = transformer(**annotations)
 
-            # only uses this transformation if number of bboxes is not 0
-            if len(augmented["bboxes"]) > 0:
-                transformed_image = augmented["image"]
-                transformed_bboxes = augmented["bboxes"]
-                transformed_category_ids = augmented["category_ids"]
+            while len(augmented["bboxes"]) == 0:
+                augmented = transformer(**annotations)
+
+            transformed_image = augmented["image"]
+            transformed_bboxes = augmented["bboxes"]
+            transformed_category_ids = augmented["category_ids"]
 
         return (transformed_image, transformed_bboxes, transformed_category_ids)
