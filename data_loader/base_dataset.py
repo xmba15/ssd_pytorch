@@ -130,6 +130,45 @@ class BaseDataset(object):
 
         return image
 
+    def _data_generation(self, idx):
+        abs_image_path = self._image_paths[idx]
+        o_img = cv2.imread(abs_image_path)
+        o_height, o_width, _ = o_img.shape
+
+        o_bboxes, o_category_ids = self._targets[idx]
+
+        o_bboxes = [
+            BaseDataset.authentize_bbox(o_height, o_width, bbox)
+            for bbox in o_bboxes
+        ]
+
+        if self._transform:
+            img, bboxes, category_ids = self._transform(
+                o_img, o_bboxes, o_category_ids, phase=self._phase
+            )
+
+        # if number of boxes is 0, use original image
+        # see data transform for more details
+
+        # use the height, width after transformation for normalization
+        height, width, _ = img.shape
+        if self._normalize_bbox:
+            bboxes = [
+                [
+                    float(bbox[0]) / width,
+                    float(bbox[1]) / height,
+                    float(bbox[2]) / width,
+                    float(bbox[3]) / height,
+                ]
+                for bbox in bboxes
+            ]
+
+        bboxes = np.array(bboxes)
+        category_ids = np.array(category_ids).reshape(-1, 1)
+        targets = np.concatenate((bboxes, category_ids), axis=-1)
+
+        return img, targets
+
     @staticmethod
     def authentize_bbox(o_height, o_width, bbox):
         bbox_type = type(bbox)

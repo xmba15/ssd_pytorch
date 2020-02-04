@@ -325,46 +325,12 @@ class UecFoodDataset(BaseDataset):
             image_dict[image_name][1].append(int(label))
 
         self._image_paths = list(image_dict.keys())
+
+        # get the list of absolute paths
+        self._image_paths = [
+            os.path.join(self._data_path, "dataset256/{}".format(image_path))
+            for image_path in self._image_paths
+        ]
         self._targets = list(image_dict.values())
 
         np.random.seed(random_seed)
-
-    def _data_generation(self, idx):
-        abs_image_path = os.path.join(
-            self._data_path, "dataset256/{}".format(self._image_paths[idx])
-        )
-        img = cv2.imread(abs_image_path)
-        o_height, o_width, _ = img.shape
-
-        bboxes, category_ids = self._targets[idx]
-        bboxes = [
-            BaseDataset.authentize_bbox(o_height, o_width, bbox)
-            for bbox in bboxes
-        ]
-
-        if self._transform:
-            img, bboxes, category_ids = self._transform(
-                img, bboxes, category_ids, phase=self._phase
-            )
-
-        # assert number of bboxes after transformation is greater than 0
-        assert len(bboxes) > 0
-
-        # use the height, width after transformation for normalization
-        height, width, _ = img.shape
-        if self._normalize_bbox:
-            bboxes = [
-                [
-                    float(bbox[0]) / width,
-                    float(bbox[1]) / height,
-                    float(bbox[2]) / width,
-                    float(bbox[3]) / height,
-                ]
-                for bbox in bboxes
-            ]
-
-        bboxes = np.array(bboxes)
-        category_ids = np.array(category_ids).reshape(-1, 1)
-        targets = np.concatenate((bboxes, category_ids), axis=-1)
-
-        return img, targets

@@ -15,6 +15,7 @@ from models import SSD300
 parser = argparse.ArgumentParser()
 parser.add_argument("--snapshot", required=True)
 parser.add_argument("--image_path", required=True)
+parser.add_argument("--conf_thresh", type=float)
 parsed_args = parser.parse_args()
 
 
@@ -26,7 +27,7 @@ ssd_cfg = {
     "steps": [8, 16, 32, 64, 100, 300],
     "aspect_ratios": [[2], [2, 3], [2, 3], [2, 3], [2], [2]],
     "top_k": 200,
-    "conf_thresh": 0.5,
+    "conf_thresh": 0.3,
     "nms_thresh": 0.45,
 }
 
@@ -39,6 +40,10 @@ def main(args):
     data_transform = VOCDataTransform(input_size=input_size)
     voc_data_config = VOCDatasetConfig()
 
+    if args.conf_thresh:
+        ssd_cfg["conf_thresh"] = args.conf_thresh
+    conf_thresh = ssd_cfg["conf_thresh"]
+
     model = SSD300(phase="eval", cfg=ssd_cfg)
     model.load_state_dict(torch.load(args.snapshot)["state_dict"])
 
@@ -47,7 +52,7 @@ def main(args):
     )
 
     img = cv2.imread(args.image_path)
-    result = predict_show_handler(img, conf_thresh=ssd_cfg["conf_thresh"])
+    result = predict_show_handler(img, conf_thresh=conf_thresh)
     cv2.imshow("result", result)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
