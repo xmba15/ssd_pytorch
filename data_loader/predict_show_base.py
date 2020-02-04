@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 import torch
-from .base_dataset import BaseDataset
+from .dataset_base import DatasetBase
 
 
 def _normalize_fuc(img):
@@ -14,7 +14,7 @@ def _normalize_fuc(img):
     return img
 
 
-class BasePredictShow(object):
+class PredictShowBase(object):
     def __init__(self, net, classes, colors, transform=None):
         self._net = net
         self._net.eval()
@@ -57,7 +57,7 @@ class BasePredictShow(object):
                 all_category_ids.append(lable_ind)
                 scores.append(sc)
 
-        result = BaseDataset.visualize_one_image_util(
+        result = DatasetBase.visualize_one_image_util(
             orig_img, self._classes, self._colors, all_bboxes, all_category_ids
         )
 

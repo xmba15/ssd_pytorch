@@ -32,3 +32,22 @@
 ```bash
     bash ./scripts/download_voc_dataset.sh
 ```
+
+## Training ##
+***
+
+```bash
+    python [dataset_name]_train.py --batch_size {batch_size} --lr_rate {lr_rate} --num_epoch {num_epoch} --snapshot {snapshot} --save_period {save_period}
+```
+
+```text
+    snapshot: for resuming training from a checkpoint
+    save_period: frequency to save checkpoints
+```
+
+## Testing ##
+***
+
+```bash
+    python [dataset_name]_test_single_image.py --snapshot {snapshot} --image_path {image_path} --conf_thresh {conf_thresh}
+```

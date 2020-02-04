@@ -5,9 +5,9 @@ import cv2
 import argparse
 import torch
 from data_loader import (
-    BasePredictShow,
-    VOCDatasetConfig,
-    VOCDataTransform,
+    PredictShowBase,
+    UecFoodDatasetConfig,
+    UecFoodDataTransform,
 )
 from models import SSD300
 
@@ -20,7 +20,7 @@ parsed_args = parser.parse_args()
 
 
 ssd_cfg = {
-    "num_classes": 20 + 1,  # plus 1 for the background label
+    "num_classes": 256 + 1,  # plus 1 for the background label
     "input_size": 300,
     "bbox_aspect_num": [4, 6, 6, 6, 4, 4],
     "feature_maps": [38, 19, 10, 5, 3, 1],
@@ -37,8 +37,8 @@ def main(args):
     assert args.image_path and os.path.isfile(args.image_path)
 
     input_size = (300, 300)
-    data_transform = VOCDataTransform(input_size=input_size)
-    voc_data_config = VOCDatasetConfig()
+    data_transform = UecFoodDataTransform(input_size=input_size)
+    data_config = UecFoodDatasetConfig()
 
     if args.conf_thresh:
         ssd_cfg["conf_thresh"] = args.conf_thresh
@@ -47,8 +47,8 @@ def main(args):
     model = SSD300(phase="eval", cfg=ssd_cfg)
     model.load_state_dict(torch.load(args.snapshot)["state_dict"])
 
-    predict_show_handler = BasePredictShow(
-        model, voc_data_config.CLASSES, voc_data_config.COLORS, data_transform,
+    predict_show_handler = PredictShowBase(
+        model, data_config.CLASSES, data_config.COLORS, data_transform,
     )
 
     img = cv2.imread(args.image_path)

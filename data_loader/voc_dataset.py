@@ -4,10 +4,10 @@ import os
 import cv2
 import numpy as np
 import xml.etree.ElementTree as ET
-from .base_dataset import BaseDataset, BaseDatasetConfig
+from .dataset_base import DatasetBase, DatasetConfigBase
 
 
-class VOCDatasetConfig(BaseDatasetConfig):
+class VOCDatasetConfig(DatasetConfigBase):
     def __init__(self):
         super(VOCDatasetConfig, self).__init__()
 
@@ -34,13 +34,13 @@ class VOCDatasetConfig(BaseDatasetConfig):
             "tvmonitor",
         ]
 
-        self.COLORS = BaseDatasetConfig.generate_color_chart(self.num_classes)
+        self.COLORS = DatasetConfigBase.generate_color_chart(self.num_classes)
 
 
 _voc_config = VOCDatasetConfig()
 
 
-class VOCDataset(BaseDataset):
+class VOCDataset(DatasetBase):
     __name__ = "voc_dataset"
 
     def __init__(

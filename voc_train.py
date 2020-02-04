@@ -148,6 +148,7 @@ def main(args):
         data_loaders_dict=data_loaders_dict,
         scheduler=scheduler,
         device=device,
+        dataset_name_base=train_dataset.__name__,
     )
 
     if args.snapshot and os.path.isfile(args.snapshot):

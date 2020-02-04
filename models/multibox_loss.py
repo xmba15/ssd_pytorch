@@ -9,11 +9,6 @@ from .functions import match
 from .default_boxes import DBox
 
 
-def log_sum_exp(x):
-    x_max = x.data.max()
-    return torch.log(torch.sum(torch.exp(x - x_max), 1, keepdim=True)) + x_max
-
-
 class MultiBoxLoss(nn.Module):
     def __init__(
         self,
@@ -65,7 +60,7 @@ class MultiBoxLoss(nn.Module):
         loc_p = loc_data[pos_idx].view(-1, 4)
         loc_t = loc_t[pos_idx].view(-1, 4)
 
-        loss_l = F.smooth_l1_loss(loc_p, loc_t, size_average=False)
+        loss_l = F.smooth_l1_loss(loc_p, loc_t, reduction="sum")
 
         batch_conf = conf_data.view(-1, num_classes)
 

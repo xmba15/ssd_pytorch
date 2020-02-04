@@ -10,7 +10,7 @@ _CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(_CURRENT_DIR, ".."))
 
 
-class BaseTrainer:
+class TrainerBase:
     def __init__(
         self,
         model,
@@ -21,12 +21,14 @@ class BaseTrainer:
         save_period,
         config,
         device=None,
+        dataset_name_base="",
     ):
         self._model = model
         self._criterion = criterion
         self._metric_func = metric_func
         self._optimizer = optimizer
         self._config = config
+        self._dataset_name_base = dataset_name_base
 
         if device is None:
             self._device = torch.device(
@@ -63,10 +65,15 @@ class BaseTrainer:
             "state_dict": self._model.state_dict(),
             "optimizer": self._optimizer.state_dict(),
         }
-        filename = os.path.join(
-            self._checkpoint_dir,
-            "checkpoint_{}_epoch_{}.pth".format(arch, epoch),
-        )
+        output_file = "checkpoint_{}_epoch_{}.pth".format(arch, epoch)
+        if (
+            self._dataset_name_base
+            and isinstance(self._dataset_name_base, str)
+            and self._dataset_name_base != ""
+        ):
+            output_file = "{}_{}".format(self._dataset_name_base, output_file)
+
+        filename = os.path.join(self._checkpoint_dir, output_file)
         torch.save(state, filename)
 
         # if save_best:

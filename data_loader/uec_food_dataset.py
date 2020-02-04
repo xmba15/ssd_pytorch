@@ -3,10 +3,10 @@
 import os
 import cv2
 import numpy as np
-from .base_dataset import BaseDataset, BaseDatasetConfig
+from .dataset_base import DatasetBase, DatasetConfigBase
 
 
-class UecFoodDatasetConfig(BaseDatasetConfig):
+class UecFoodDatasetConfig(DatasetConfigBase):
     def __init__(self):
         super(UecFoodDatasetConfig, self).__init__()
 
@@ -269,13 +269,13 @@ class UecFoodDatasetConfig(BaseDatasetConfig):
             "hot & sour soup",
         ]
 
-        self.COLORS = BaseDatasetConfig.generate_color_chart(self.num_classes)
+        self.COLORS = DatasetConfigBase.generate_color_chart(self.num_classes)
 
 
 _uec_config = UecFoodDatasetConfig()
 
 
-class UecFoodDataset(BaseDataset):
+class UecFoodDataset(DatasetBase):
     __name__ = "uec_food"
 
     def __init__(

@@ -145,6 +145,7 @@ def main(args):
         data_loaders_dict=data_loaders_dict,
         scheduler=scheduler,
         device=device,
+        dataset_name_base=train_dataset.__name__,
     )
 
     with torch.autograd.set_detect_anomaly(True):

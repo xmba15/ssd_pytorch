@@ -6,7 +6,7 @@ import numpy as np
 from abc import abstractmethod
 
 
-class BaseDatasetConfig:
+class DatasetConfigBase:
     def __init__(self):
         self.CLASSES = []
 
@@ -27,7 +27,7 @@ class BaseDatasetConfig:
         return colors
 
 
-class BaseDataset(object):
+class DatasetBase(object):
     def __init__(
         self,
         data_path,
@@ -39,7 +39,7 @@ class BaseDataset(object):
         normalize_bbox=False,
         bbox_transformer=None,
     ):
-        super(BaseDataset, self).__init__()
+        super(DatasetBase, self).__init__()
         assert os.path.isdir(data_path)
         assert phase in ("train", "val", "test")
 
@@ -91,7 +91,7 @@ class BaseDataset(object):
         all_bboxes = all_bboxes.astype(np.int64)
         all_category_ids = all_category_ids.astype(np.int64)
 
-        return BaseDataset.visualize_one_image_util(
+        return DatasetBase.visualize_one_image_util(
             image, self._classes, self._colors, all_bboxes, all_category_ids
         )
 
@@ -138,7 +138,7 @@ class BaseDataset(object):
         o_bboxes, o_category_ids = self._targets[idx]
 
         o_bboxes = [
-            BaseDataset.authentize_bbox(o_height, o_width, bbox)
+            DatasetBase.authentize_bbox(o_height, o_width, bbox)
             for bbox in o_bboxes
         ]
 

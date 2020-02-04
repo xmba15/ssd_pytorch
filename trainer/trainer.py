@@ -3,7 +3,7 @@
 import os
 import sys
 import torch
-from .base_trainer import BaseTrainer
+from .trainer_base import TrainerBase
 
 
 _CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -15,7 +15,7 @@ except:
     sys.exit(-1)
 
 
-class Trainer(BaseTrainer):
+class Trainer(TrainerBase):
     def __init__(
         self,
         model,
@@ -29,6 +29,7 @@ class Trainer(BaseTrainer):
         scheduler=None,
         device=None,
         len_epoch=None,
+        dataset_name_base="",
     ):
         super(Trainer, self).__init__(
             model,
@@ -39,6 +40,7 @@ class Trainer(BaseTrainer):
             save_period,
             config,
             device,
+            dataset_name_base,
         )
 
         self.train_data_loader = data_loaders_dict["train"]
