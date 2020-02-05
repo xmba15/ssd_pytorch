@@ -36,14 +36,15 @@ from albumentations import (
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--batch_size", type=int, default=32)
-parser.add_argument("--num_epoch", type=int, default=860)
+parser.add_argument("--num_epoch", type=int, default=300)
 parser.add_argument("--lr_rate", type=float, default=1e-3)
 parser.add_argument("--momentum", default=0.9, type=float)
 parser.add_argument("--weight_decay", default=5e-4, type=float)
 parser.add_argument("--gamma", default=0.1, type=float)
-parser.add_argument("--milestones", default="571, 714", type=str)
+parser.add_argument("--milestones", default="140, 220", type=str)
 parser.add_argument("--save_period", type=int, default=5)
 parser.add_argument("--snapshot", type=str)
+parser.add_argument("--alpha", default=1.0, type=float)
 parsed_args = parser.parse_args()
 
 
@@ -52,8 +53,15 @@ def train_process(dataset_class, data_transform_class, input_size=(300, 300)):
     dt_config.display()
 
     transforms = [
-        OneOf([IAAAdditiveGaussianNoise(), GaussNoise(),], p=0.5),
-        OneOf([MedianBlur(), GaussianBlur(), MotionBlur()], p=0.5),
+        OneOf([IAAAdditiveGaussianNoise(), GaussNoise()], p=0.5),
+        # OneOf(
+        #     [
+        #         MedianBlur(blur_limit=3),
+        #         GaussianBlur(blur_limit=3),
+        #         MotionBlur(blur_limit=3),
+        #     ],
+        #     p=0.1,
+        # ),
         RandomGamma(gamma_limit=(80, 120), p=0.5),
         RandomBrightnessContrast(p=0.5),
         HueSaturationValue(
@@ -61,11 +69,8 @@ def train_process(dataset_class, data_transform_class, input_size=(300, 300)):
         ),
         ChannelShuffle(p=0.5),
         HorizontalFlip(p=0.5),
-        Cutout(num_holes=5, p=0.5),
-        Rotate(limit=30, p=0.5),
-        # ShiftScaleRotate(scale_limit=0.5, rotate_limit=20, p=0.6),
-        # IAAAffine(p=0.5),
-        # RandomShadow(p=0.5),
+        Cutout(num_holes=2, max_w_size=40, max_h_size=40, p=0.5),
+        Rotate(limit=20, p=0.5, border_mode=0),
     ]
 
     data_transform = data_transform_class(
@@ -144,6 +149,7 @@ def train_process(dataset_class, data_transform_class, input_size=(300, 300)):
         scheduler=scheduler,
         device=device,
         dataset_name_base=train_dataset.__name__,
+        alpha=parsed_args.alpha,
     )
 
     if parsed_args.snapshot and os.path.isfile(parsed_args.snapshot):

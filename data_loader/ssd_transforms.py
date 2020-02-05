@@ -40,7 +40,7 @@ class Expand(object):
             return image, boxes, labels
 
         height, width, depth = image.shape
-        ratio = random.uniform(1, 4)
+        ratio = random.uniform(1, 1.5)
         left = random.uniform(0, width * ratio - width)
         top = random.uniform(0, height * ratio - height)
 
@@ -54,11 +54,6 @@ class Expand(object):
         image = expand_image
 
         boxes = np.array(boxes)
-        # print("00000000000000")
-        # print(boxes)
-        # boxes[:, :2]
-        # print("00000000000000")
-
         boxes[:, :2] += [int(left), int(top)]
         boxes[:, 2:] += [int(left), int(top)]
 

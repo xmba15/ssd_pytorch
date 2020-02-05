@@ -3,6 +3,7 @@
 import os
 import sys
 import torch
+import torch.nn as nn
 from .trainer_base import TrainerBase
 
 
@@ -30,6 +31,7 @@ class Trainer(TrainerBase):
         device=None,
         len_epoch=None,
         dataset_name_base="",
+        alpha=1.0,
     ):
         super(Trainer, self).__init__(
             model,
@@ -53,6 +55,7 @@ class Trainer(TrainerBase):
 
         self._do_validation = self.val_data_loader is not None
         self._scheduler = scheduler
+        self._alpha = alpha
 
     def _train_epoch(self, epoch):
         self._model.train()
@@ -65,8 +68,12 @@ class Trainer(TrainerBase):
 
             output = self._model(data)
             loss_c, loss_l = self._criterion(output, target)
+            loss_l = self._alpha * loss_l
             train_loss = loss_c + loss_l
             train_loss.backward()
+
+            nn.utils.clip_grad_value_(self._model.parameters(), clip_value=2.0)
+
             self._optimizer.step()
 
             if batch_idx % 10 == 0:
@@ -106,6 +113,7 @@ class Trainer(TrainerBase):
 
                 output = self._model(data)
                 loss_c, loss_l = self._criterion(output, target)
+                loss_l = self._alpha * loss_l
                 val_loss = loss_c + loss_l
                 epoch_val_loss += val_loss.item()
 

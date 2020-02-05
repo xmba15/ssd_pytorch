@@ -12,6 +12,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--snapshot", required=True)
 parser.add_argument("--image_path", required=True)
 parser.add_argument("--conf_thresh", type=float)
+parser.add_argument("--output_size", type=int)
 parsed_args = parser.parse_args()
 
 
@@ -50,6 +51,12 @@ def test_process(
 
     img = cv2.imread(parsed_args.image_path)
     result = predict_show_handler(img, conf_thresh=conf_thresh)
+
+    if parsed_args.output_size:
+        result = cv2.resize(
+            result, (parsed_args.output_size, parsed_args.output_size)
+        )
+
     cv2.imshow("result", result)
     cv2.waitKey(0)
     cv2.destroyAllWindows()

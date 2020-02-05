@@ -1,13 +1,30 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from albumentations import BboxParams, Compose, Resize, Normalize
+from albumentations import (
+    BboxParams,
+    Compose,
+    Resize,
+    Normalize,
+    HorizontalFlip,
+    GaussNoise,
+    RandomBrightnessContrast,
+)
 
 
 class DataTransformBase(object):
-    def __init__(self, input_size=None, normalize=True):
+    def __init__(
+        self,
+        transforms=[
+            HorizontalFlip(p=0.5),
+            GaussNoise(p=0.5),
+            RandomBrightnessContrast(p=0.5),
+        ],
+        input_size=None,
+        normalize=True,
+    ):
         self._input_size = input_size
         self._normalize = normalize
-        self._train_transform_list = []
+        self._train_transform_list = transforms
         self._val_transform_list = []
 
         self._transforms_dict = {}
@@ -17,6 +34,7 @@ class DataTransformBase(object):
             min_visibility=0.001,
             label_fields=["category_ids"],
         )
+        self._initialize_transform_dict()
 
     def _initialize_transform_dict(self):
         if self._input_size is not None:
