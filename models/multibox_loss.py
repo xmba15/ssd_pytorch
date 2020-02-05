@@ -7,6 +7,7 @@ import torch.nn.functional as F
 from torch.autograd import Variable
 from .functions import match
 from .default_boxes import DBox
+from .focal_loss import FocalLoss
 
 
 class MultiBoxLoss(nn.Module):
@@ -16,6 +17,7 @@ class MultiBoxLoss(nn.Module):
         jaccard_thresh=0.5,
         neg_pos=3,
         variances=[0.1, 0.2],
+        focal_loss_gamma=2,
         device="cpu",
     ):
         super(MultiBoxLoss, self).__init__()
@@ -24,6 +26,9 @@ class MultiBoxLoss(nn.Module):
         self._neg_pos = neg_pos
         self._variances = variances
         self._device = device
+        self._focal_loss = FocalLoss(
+            gamma=focal_loss_gamma, device=self._device
+        )
 
     def forward(self, predictions, targets):
         loc_data, conf_data, dbox_list = predictions
@@ -87,7 +92,8 @@ class MultiBoxLoss(nn.Module):
         )
         conf_t_label_hnm = conf_t_label[(pos_mask + neg_mask).gt(0)]
 
-        loss_c = F.cross_entropy(conf_hnm, conf_t_label_hnm, reduction="sum")
+        # loss_c = F.cross_entropy(conf_hnm, conf_t_label_hnm, reduction="sum")
+        loss_c = self._focal_loss(conf_hnm, conf_t_label_hnm)
 
         N = num_pos.sum()
         loss_l /= N
