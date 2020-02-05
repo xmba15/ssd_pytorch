@@ -17,8 +17,6 @@ from albumentations import (
     OneOf,
     CLAHE,
     HueSaturationValue,
-    RandomBrightness,
-    RandomContrast,
     RandomGamma,
     IAAAdditiveGaussianNoise,
     GaussNoise,
@@ -31,6 +29,9 @@ from albumentations import (
     MedianBlur,
     GaussianBlur,
     MotionBlur,
+    RandomBrightnessContrast,
+    Rotate,
+    ChannelShuffle,
 )
 
 parser = argparse.ArgumentParser()
@@ -53,18 +54,18 @@ def train_process(dataset_class, data_transform_class, input_size=(300, 300)):
     transforms = [
         OneOf([IAAAdditiveGaussianNoise(), GaussNoise(),], p=0.5),
         OneOf([MedianBlur(), GaussianBlur(), MotionBlur()], p=0.5),
-        RandomContrast(limit=0.2, p=0.5),
         RandomGamma(gamma_limit=(80, 120), p=0.5),
-        RandomBrightness(limit=0.2, p=0.5),
+        RandomBrightnessContrast(p=0.5),
         HueSaturationValue(
             hue_shift_limit=5, sat_shift_limit=20, val_shift_limit=10, p=0.5
         ),
-        CLAHE(clip_limit=2.0, p=0.5),
+        ChannelShuffle(p=0.5),
         HorizontalFlip(p=0.5),
-        Cutout(num_holes=5, p=0.6),
-        ShiftScaleRotate(scale_limit=0.5, rotate_limit=20, p=0.6),
-        IAAAffine(p=0.5),
-        RandomShadow(p=0.5),
+        Cutout(num_holes=5, p=0.5),
+        Rotate(limit=30, p=0.5),
+        # ShiftScaleRotate(scale_limit=0.5, rotate_limit=20, p=0.6),
+        # IAAAffine(p=0.5),
+        # RandomShadow(p=0.5),
     ]
 
     data_transform = data_transform_class(
