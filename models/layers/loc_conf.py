@@ -7,7 +7,7 @@ import torch.nn as nn
 def build_loc_conf(
     num_classes,
     bbox_aspect_num=[4, 6, 6, 6, 4, 4],
-    input_channels=[1024, 512, 512, 256, 256, 256],
+    input_channels=[512, 1024, 512, 256, 256, 256],
 ):
     loc_net = []
     conf_net = []

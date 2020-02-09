@@ -73,7 +73,7 @@ class VOCDataset(DatasetBase):
 
         assert phase in ("train", "val")
         self._data_path = os.path.join(
-            self._data_path, "voc/VOCtrainval_06-Nov-2007/VOCdevkit/VOC2007"
+            self._data_path, "voc/VOCdevkit/VOC2012"
         )
         self._image_path_file = os.path.join(
             self._data_path, "ImageSets/Main/{}.txt".format(self._phase),

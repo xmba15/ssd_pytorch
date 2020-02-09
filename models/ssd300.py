@@ -3,7 +3,7 @@
 import re
 import torch
 import torch.nn as nn
-from .layers import Resnet, build_extras, build_loc_conf
+from .layers import VGG, build_extras, build_loc_conf, L2Norm
 from .default_boxes import DBox
 from .functions import Detect
 
@@ -11,7 +11,7 @@ from .functions import Detect
 class SSD300(nn.Module):
     __name__ = "ssd300"
 
-    def __init__(self, phase, cfg, backbone=Resnet()):
+    def __init__(self, phase, cfg, backbone=VGG()):
         super(SSD300, self).__init__()
         assert phase in ("train", "eval")
         self.phase = phase
@@ -21,15 +21,15 @@ class SSD300(nn.Module):
         self.conf_thresh = cfg["conf_thresh"]
         self.nms_thresh = cfg["nms_thresh"]
 
-        self.feature_extractor = backbone
+        self.feature_extractor, out_channels = backbone
+        self.L2Norm = L2Norm(512)
         self.additional_blocks = build_extras(
-            input_size=self.feature_extractor.out_channels
+            input_size=out_channels
         )
 
         self.loc, self.conf = build_loc_conf(
             num_classes=self.num_classes,
             bbox_aspect_num=self.bbox_aspect_num,
-            input_channels=self.feature_extractor.out_channels,
         )
 
         self.dbox_list = torch.Tensor(DBox(cfg).build_dbox_list())
@@ -41,14 +41,16 @@ class SSD300(nn.Module):
                 nms_thresh=self.nms_thresh,
             )
 
-        self._init_weights()
+        self.feature_extractor.apply(self.weights_init)
+        self.additional_blocks.apply(self.weights_init)
+        self.loc.apply(self.weights_init)
+        self.conf.apply(self.weights_init)
 
-    def _init_weights(self):
-        layers = [*self.additional_blocks, *self.loc, *self.conf]
-        for layer in layers:
-            for param in layer.parameters():
-                if param.dim() > 1:
-                    nn.init.xavier_uniform_(param)
+    def weights_init(self, m):
+        if isinstance(m, nn.Conv2d):
+            nn.init.kaiming_normal_(m.weight.data)
+            if m.bias is not None:
+                nn.init.constant_(m.bias, 0.0)
 
     def bbox_view(self, src, loc, conf):
         ret = []
@@ -68,8 +70,17 @@ class SSD300(nn.Module):
         return locs, confs
 
     def forward(self, x):
-        x = self.feature_extractor(x)
-        detection_feed = [x]
+        detection_feed = []
+
+        for k in range(23):
+            x = self.feature_extractor[k](x)
+        source1 = self.L2Norm(x)
+        detection_feed.append(source1)
+
+        for k in range(23, len(self.feature_extractor)):
+            x = self.feature_extractor[k](x)
+        detection_feed.append(x)
+
         for l in self.additional_blocks:
             x = l(x)
             detection_feed.append(x)
