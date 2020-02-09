@@ -76,10 +76,6 @@ class DatasetBase(object):
     def __len__(self):
         return len(self._image_paths)
 
-    @abstractmethod
-    def _data_generation(self, idx):
-        raise NotImplementedError()
-
     def visualize_one_image(self, idx):
         assert not self._normalize_bbox
         assert idx < self.__len__()
