@@ -1,3 +1,9 @@
+## Visualization of Priors ##
+***
+
+![Default Boxes](./docs/images/default_boxes.png)
+
+
 ## Training Data  ##
 ***
 

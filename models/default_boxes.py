@@ -9,7 +9,7 @@ class DBox(object):
     Read [the paper](https://arxiv.org/pdf/1512.02325.pdf) for more detail
     """
 
-    def __init__(self, cfg, s_min=0.2, s_max=0.9):
+    def __init__(self, cfg, s_min=0.1, s_max=0.9):
         super(DBox, self).__init__()
         self._image_size = cfg["input_size"]
         self._feature_maps = cfg["feature_maps"]
